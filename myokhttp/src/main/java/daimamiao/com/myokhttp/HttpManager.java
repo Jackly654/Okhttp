@@ -63,7 +63,9 @@ public class HttpManager {
     /**
      * request请求
      */
-    public static  <T extends HttpInterface> void request()
+    public static  <T extends HttpInterface> void request(){
+        RunnableUtils.run
+    }
 
 
 

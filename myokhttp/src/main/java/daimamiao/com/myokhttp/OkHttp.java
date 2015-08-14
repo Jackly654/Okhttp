@@ -3,6 +3,7 @@ package daimamiao.com.myokhttp;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Pair;
 
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.OkHttpClient;
@@ -11,6 +12,8 @@ import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+
+import daimamiao.com.myokhttp.utils.RunnableUtils;
 
 /**
  * Created by pengying on 2015/8/12.
@@ -36,6 +39,7 @@ public class OkHttp implements HttpInterface{
         this.mContext = context;
     }
 
+    //post处理文件
     public void call(){
         Request.Builder builder = new Request.Builder();
         //设置取消的tag
@@ -61,5 +65,47 @@ public class OkHttp implements HttpInterface{
 
             }
         };
+    }
+
+    public void call(){
+        Request.Builder builder = new Request.Builder();
+        builder.tag();
+        if("get".equals(config.method)){
+            builder.url(getRequestParamsUrl());
+        }else{
+            builder.url();
+            builder.post()
+
+        }
+    }
+
+    private String getRequestParamsUrl() {
+        return null;
+    }
+
+    /**
+     * 处理action ,根据标记决定是否在主线程还是当前线程执行
+     *
+     * @param action
+     * @param isExecute 是否在当前线程中运行
+     */
+    private void runAction(Runnable action, boolean isExecute) {
+        if (null != action) {
+            //在子线程中运行
+            if (isExecute) {
+                if (Looper.getMainLooper() != Looper.myLooper()) {
+                    action.run();
+                } else {
+                    RunnableUtils.runWithExecutor(action);
+                }
+            } else {
+                //在ui线程运行
+                if (Looper.getMainLooper() == Looper.myLooper()) {
+                    action.run();
+                } else {
+                    mHandler.post(action);
+                }
+            }
+        }
     }
 }

@@ -67,6 +67,9 @@ public class HttpManager {
         RunnableUtils.run
     }
 
+    public static <T extends  HttpInterface> void request(){
+        request();
+    }
 
 
     public static class SimpleResponseParamsListener implements ResponseParamsListener {

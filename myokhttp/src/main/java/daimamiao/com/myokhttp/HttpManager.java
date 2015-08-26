@@ -3,17 +3,24 @@ package daimamiao.com.myokhttp;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.text.TextUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+
+import daimamiao.com.myokhttp.preference.ConfigManager;
+import daimamiao.com.myokhttp.utils.RunnableUtils;
 
 /**
  * Created by pengying on 2015/8/12.
  */
 public class HttpManager {
     public static final  OkHttp mOkHttp;
-
+    private static final HashMap<String, ArrayList<String>> mRequestTags;
     static {
         mOkHttp = new OkHttp();
+        mRequestTags = new HashMap<>();
     }
 
     /**
@@ -62,13 +69,21 @@ public class HttpManager {
 
     /**
      * request请求
+     * @param action
+     * @param listener
      */
     public static  <T extends HttpInterface> void request(){
-        RunnableUtils.run
+        RunnableUtils.
     }
 
-    public static <T extends  HttpInterface> void request(){
-        request();
+    public static <T extends  HttpInterface> void request(Object object,String action){
+        if(checkNetWork()) {
+            if (!TextUtils.isEmpty(action)) {
+                cacheTag(object, action);
+                ConfigManager.get().runNetAction();
+                request();
+            }
+        }
     }
 
 
@@ -110,5 +125,21 @@ public class HttpManager {
         void onFail(boolean noNetwok, Exception error);
     }
 
-
+    /**
+     * 缓存请求标记
+     *
+     * @param object
+     * @param action
+     */
+    private static void cacheTag(Object object, String action) {
+        if (null != object) {
+            String key = object.toString();
+            ArrayList<String> tags = mRequestTags.get(key);
+            if (null == tags || tags.isEmpty()) {
+                tags = new ArrayList<>();
+                mRequestTags.put(key, tags);
+            }
+            tags.add(action);
+        }
+    }
 }

@@ -8,7 +8,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import daimamiao.com.myokhttp.listener.Itask;
+import daimamiao.com.myokhttp.listener.ITask;
 
 /**
  * 解析XML内容
@@ -48,7 +48,7 @@ public class XmlParser {
 
     }
 
-    public static void runParser(XmlPullParser parser,Itask<String>task){
+    public static void runParser(XmlPullParser parser,ITask<String> task){
 
     }
 

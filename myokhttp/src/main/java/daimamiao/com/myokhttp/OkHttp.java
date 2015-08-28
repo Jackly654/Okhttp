@@ -6,6 +6,7 @@ import android.os.Looper;
 import android.util.Pair;
 
 import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.MultipartBuilder;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -13,6 +14,7 @@ import com.squareup.okhttp.Response;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import daimamiao.com.myokhttp.preference.config.NetConfig;
 import daimamiao.com.myokhttp.utils.RunnableUtils;
 
 /**
@@ -40,18 +42,37 @@ public class OkHttp implements HttpInterface{
     }
 
     //post处理文件
-    public void call(){
+    public void call(NetConfig config){
         Request.Builder builder = new Request.Builder();
+        final String action = config.action;
         //设置取消的tag
-        builder.tag();
+        builder.tag(action);
         //判断get或者post
-        if(boolean){
-        builder.url();
+        if("get".equals(config.method)){
+        builder.url(getRequestParamsUrl());
         }else{
-            builder.url()
+            String requestUrl = getRequestUrl(config.url);
+            builder.url(requestUrl);
+            builder.post(getRequestBody().build());
         }
        mClient.newCall(builder.build()).enqueue(getRequestParamsCallback());
     }
+
+    private MultipartBuilder getRequestBody() {
+        return null;
+    }
+
+    public static String getRequestUrl(String url) {
+        return getRequestUrl(url,/*ConfigName.SERVER_URL,*/NetWorkConfig.source());
+    }
+
+    public static String getRequestUrl(String url,String default_server_url) {
+        String paramsUrl;
+        paramsUrl = default_server_url + url;
+        return paramsUrl;
+    }
+
+
 
     private Callback getRequestParamsCallback() {
         return new Callback() {

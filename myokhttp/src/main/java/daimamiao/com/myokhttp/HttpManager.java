@@ -5,12 +5,16 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.text.TextUtils;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import daimamiao.com.myokhttp.listener.Task;
 import daimamiao.com.myokhttp.preference.ConfigManager;
+import daimamiao.com.myokhttp.preference.config.NetConfig;
 import daimamiao.com.myokhttp.utils.RunnableUtils;
+import daimamiao.com.okhttp.application.App;
 
 /**
  * Created by pengying on 2015/8/12.
@@ -18,9 +22,12 @@ import daimamiao.com.myokhttp.utils.RunnableUtils;
 public class HttpManager {
     public static final  OkHttp mOkHttp;
     private static final HashMap<String, ArrayList<String>> mRequestTags;
+    private static final HashMap<Class<?>,Constructor<?>> mConstructors;
     static {
         mOkHttp = new OkHttp();
         mRequestTags = new HashMap<>();
+        mConstructors = new HashMap<>();
+
     }
 
     /**
@@ -76,11 +83,33 @@ public class HttpManager {
         RunnableUtils.
     }
 
-    public static <T extends  HttpInterface> void request(Object object,String action){
+    public static <T extends  HttpInterface> void request(Object object,String action, final Class clazz){
         if(checkNetWork()) {
             if (!TextUtils.isEmpty(action)) {
                 cacheTag(object, action);
-                ConfigManager.get().runNetAction();
+                ConfigManager.get().runNetAction(action,new Task<NetConfig>() {
+
+                    @Override
+                    public void run(NetConfig netConfig) {
+                        try {
+                        Context appContext = App.getAppContext();
+                        Constructor constructor = null;
+                        //复用构造器.提高效率
+                        if(mConstructors.containsKey(clazz)){
+                            constructor = mConstructors.get(clazz);
+                        }
+                        if(constructor == null){
+                            constructor = clazz.getConstructor(Context.class,NetConfig.class);
+                            mConstructors.put(clazz,constructor);
+                        }
+                            T t = (T) constructor.newInstance(appContext,netConfig);
+                            t.call
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                    }
+                });
                 request();
             }
         }

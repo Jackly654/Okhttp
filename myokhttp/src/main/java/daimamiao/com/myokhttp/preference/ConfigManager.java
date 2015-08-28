@@ -5,6 +5,7 @@ import java.util.HashMap;
 import daimamiao.com.myokhttp.listener.Task;
 import daimamiao.com.myokhttp.preference.config.Config;
 import daimamiao.com.myokhttp.preference.reader.AssetReader;
+import daimamiao.com.myokhttp.preference.reader.NetInfoReader;
 import daimamiao.com.myokhttp.utils.HandleTask;
 
 /**配置管理对象
@@ -65,15 +66,15 @@ public class ConfigManager<T extends Config> {
     }
 
 
-    /**
+   /* *//**
      * 获取splash配置项
      *
      * @param channel
      * @return
-     */
+     *//*
     public void runLogoAction(String channel, Task<LogoConfig> task) {
         runTask(channel, new LogoConfigReader(), task);
-    }
+    }*/
 
     /**
      * 获取网络配置项

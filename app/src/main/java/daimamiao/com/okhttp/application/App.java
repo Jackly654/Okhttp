@@ -19,4 +19,8 @@ public class App extends Application {
     public static App getAppContext(){
         return instance;
     }
+
+    public static boolean isDebug() {
+        return true;
+    }
 }

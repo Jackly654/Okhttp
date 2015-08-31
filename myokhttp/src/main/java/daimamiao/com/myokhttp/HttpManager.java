@@ -13,6 +13,7 @@ import java.util.Map;
 import daimamiao.com.myokhttp.listener.Task;
 import daimamiao.com.myokhttp.preference.ConfigManager;
 import daimamiao.com.myokhttp.preference.config.NetConfig;
+import daimamiao.com.myokhttp.utils.Loger;
 import daimamiao.com.myokhttp.utils.RunnableUtils;
 import daimamiao.com.okhttp.application.App;
 
@@ -127,6 +128,8 @@ public class HttpManager {
         public void onFail(boolean noNetwok, Exception error) {
         }
     }
+
+
 
 
     /**

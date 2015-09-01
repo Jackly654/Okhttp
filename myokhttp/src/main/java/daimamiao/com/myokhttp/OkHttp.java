@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -27,6 +28,9 @@ import daimamiao.com.myokhttp.preference.config.NetConfig;
 import daimamiao.com.myokhttp.preference.preference.ConfigName;
 import daimamiao.com.myokhttp.preference.preference.PreferenceUtils;
 import daimamiao.com.myokhttp.utils.DeviceUtils;
+import daimamiao.com.myokhttp.utils.EncryptUtils;
+import daimamiao.com.myokhttp.utils.JsonUtls;
+import daimamiao.com.myokhttp.utils.Loger;
 import daimamiao.com.myokhttp.utils.PackageUtil;
 import daimamiao.com.myokhttp.utils.RunnableUtils;
 import daimamiao.com.okhttp.application.App;
@@ -57,7 +61,7 @@ public class OkHttp implements HttpInterface{
     }
 
     //post处理文件
-    public void call(NetConfig config){
+    public void call(NetConfig config,HttpManager.ResponseListener listener,boolean isExecute,Object... params){
         Request.Builder builder = new Request.Builder();
         final String action = config.action;
         //设置取消的tag
@@ -68,9 +72,59 @@ public class OkHttp implements HttpInterface{
         }else{
             String requestUrl = getRequestUrl(config.url);
             builder.url(requestUrl);
-            builder.post(getRequestBody().build());
+            builder.post(getRequestBody(config,params,null).build());
         }
-       mClient.newCall(builder.build()).enqueue(getRequestParamsCallback());
+       mClient.newCall(builder.build()).enqueue(new Callback() {
+           @Override
+           public void onFailure(Request request, IOException e) {
+                if(listener!=null){
+                    runAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onFail(false,e);
+                        }
+                    },false);
+                }
+           }
+
+           @Override
+           public void onResponse(Response response) throws IOException {
+                if(response.isSuccessful()){
+                    String body = null;
+                    body = response.body().string();
+                    //TODO 数据库插入保存 （需要自己添加
+                    Map<String, String> params = JsonUtls.getResonseDataMap(body);
+                    if(params!=null&&listener!=null){
+                        //后台确定
+                        Boolean isSuccess = Boolean.valueOf(params.get("success"));
+                        int code = JsonUtls.getRequestNumber(params.get("error_code"));
+                        runAction(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onSuccess(isSuccess, code, params.get("items"));
+                            }
+                        }, isExecute);
+                    }else if(listener!=null){
+                        runAction(new Runnable() {
+                            @Override
+                            public void run() {
+                               listener.onFail(false,null);
+                            }
+                        },false);
+                    }
+                }else if(listener!=null){
+                    String body = response.body().string();
+                    //Loger.appendInfo(OkHttp.this, response.message() + "-----" + body);
+                    runAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onFail(false, new NullPointerException());
+                        }
+                    }, false);
+                }
+               removeCall(action);
+           }
+       });
     }
 
     private MultipartBuilder getRequestBody(NetConfig config,Object[] paramsValues,File[] files) {
@@ -284,5 +338,15 @@ public class OkHttp implements HttpInterface{
                 }
             }
         }
+    }
+
+    /**
+     * 移除运行任务
+     *
+     * @param action
+     */
+    @Override
+    public void removeCall(String action) {
+        mClient.cancel(action);
     }
 }

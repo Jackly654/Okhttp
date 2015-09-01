@@ -9,6 +9,8 @@ public class NetWorkConfig {
 
 
     public static final String ROOT = "http://iosnews.chinadaily.com.cn/newsdata";
+    //getSignValue key
+    public static final String KEY = "";
     public static String CdnPath = "http://iosnews.chinadaily.com.cn/newsdata";
     //public static String CdnPath = "http://124.127.52.199/newsdata/app.shtml";
     //public static String CdnPath="http://124.127.52.199/newsdata";

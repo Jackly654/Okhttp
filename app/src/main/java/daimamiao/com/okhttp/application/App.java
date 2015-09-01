@@ -23,4 +23,8 @@ public class App extends Application {
     public static boolean isDebug() {
         return true;
     }
+
+    public static boolean isDebugRequest() {
+        return false;
+    }
 }

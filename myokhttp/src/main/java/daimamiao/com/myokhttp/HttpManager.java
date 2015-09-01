@@ -3,6 +3,7 @@ package daimamiao.com.myokhttp;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import java.lang.reflect.Constructor;
@@ -116,6 +117,56 @@ public class HttpManager {
         }
     }
 
+
+    /**
+     * 获得网络状态显示字符串
+     *
+     * @param context
+     * @return
+     */
+    public static String getNetWorkState(Context context) {
+        String result = null;
+        ConnectivityManager connectMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = connectMgr.getActiveNetworkInfo();
+        if (null != info) {
+            int type = info.getType();
+            switch (type) {
+                case ConnectivityManager.TYPE_WIFI:
+                    result = "WIFI";
+                    break;
+                case ConnectivityManager.TYPE_MOBILE:
+                    int subtype = info.getSubtype();
+                    switch (subtype) {
+                        // 2G
+                        case TelephonyManager.NETWORK_TYPE_GPRS: // 网络类型为GPRS
+                        case TelephonyManager.NETWORK_TYPE_CDMA: // 网络类型为CDMA
+                        case TelephonyManager.NETWORK_TYPE_EDGE: // 网络类型为EDGE
+                            result = "2G";
+                            break;
+                        // 4G??
+                        case TelephonyManager.NETWORK_TYPE_LTE:
+                            result = "4G";
+                            break;
+                        // 3G
+                        case TelephonyManager.NETWORK_TYPE_EVDO_0: // 网络类型为EVDO0
+                        case TelephonyManager.NETWORK_TYPE_EVDO_A:// 网络类型为EVDOA
+                        case TelephonyManager.NETWORK_TYPE_HSDPA: // 网络类型为HSDPA
+                        case TelephonyManager.NETWORK_TYPE_HSPA: // 网络类型为HSPA
+                        case TelephonyManager.NETWORK_TYPE_HSUPA: // 网络类型为HSUPA
+                        case TelephonyManager.NETWORK_TYPE_UMTS: // 网络类型为UMTS 联通3G
+                        default:
+                            result = "3G";
+                            break;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            result = "NO";
+        }
+        return result;
+    }
 
     public static class SimpleResponseParamsListener implements ResponseParamsListener {
 

@@ -8,4 +8,6 @@ public interface ConfigName {
     int DEVICE_ID = 0;
     int IID = 1;
     int DEVICE_NEW_ID = 2;
+    int UUID = 3;
+    int USER_ID = 4;
 }

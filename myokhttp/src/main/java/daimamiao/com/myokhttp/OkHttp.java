@@ -141,11 +141,17 @@ public class OkHttp implements HttpInterface{
                             if(paramsValues[i]!=null&&!"-1".equals(paramsValues[i].toString())){
                                 builder.addFormDataPart(paramsNames[i],paramsValues[i].toString());
                                 paramPair.add(new Pair(paramsNames[i],paramsValues[i].toString()));
-                            }
+
                         }else{
                             builder.addFormDataPart(paramsNames[i],paramsValues[i].toString());
+
+
+
                             paramPair.add(new Pair(paramsNames[i],paramsValues[i].toString()));
                         }
+
+
+
                     }
                 }
             }

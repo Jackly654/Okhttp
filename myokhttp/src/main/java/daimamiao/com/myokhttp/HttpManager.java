@@ -6,6 +6,7 @@ import android.net.NetworkInfo;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,11 +82,9 @@ public class HttpManager {
      * @param action
      * @param listener
      */
-    public static  <T extends HttpInterface> void request(){
-        RunnableUtils.
-    }
 
-    public static <T extends  HttpInterface> void request(Object object,String action, final Class clazz){
+
+    public static <T extends  HttpInterface> void request(Object object,String action, final ResponseListener listener,final Class<T> clazz,final Object... params){
         if(checkNetWork()) {
             if (!TextUtils.isEmpty(action)) {
                 cacheTag(object, action);
@@ -105,15 +104,18 @@ public class HttpManager {
                             mConstructors.put(clazz,constructor);
                         }
                             T t = (T) constructor.newInstance(appContext,netConfig);
-                            t.call
+                            t.call(netConfig, (null==listener) ? new SimpleRespnseListener() : listener,params);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
 
                     }
                 });
-                request();
+
             }
+
+        }else if (listener!=null){
+            listener.onFail(true,null);
         }
     }
 
@@ -168,6 +170,19 @@ public class HttpManager {
         return result;
     }
 
+    public static class SimpleRespnseListener implements ResponseListener{
+
+        @Override
+        public void onSuccess(boolean isScuuess, int code, String data) {
+
+        }
+
+        @Override
+        public void onFail(boolean noNetwok, Exception error) {
+
+        }
+    }
+
     public static class SimpleResponseParamsListener implements ResponseParamsListener {
 
         @Override
@@ -179,6 +194,7 @@ public class HttpManager {
         public void onFail(boolean noNetwok, Exception error) {
         }
     }
+
 
 
 
@@ -224,5 +240,19 @@ public class HttpManager {
             }
             tags.add(action);
         }
+    }
+
+    /**
+     * 使用Okhttp 请求
+     * @param action
+     * @param listener
+     * @param params
+     */
+    public static void request(Object object,final String action, final ResponseParamsListener listener,Object... params){
+        request(object,action,listener,OkHttp.class,params,null);
+    }
+
+    public static void upload(Object object, final String action, final ResponseParamsListener listener, Object[] params, File[] files) {
+        request(object, action, listener, OkHttp.class, params, files);
     }
 }

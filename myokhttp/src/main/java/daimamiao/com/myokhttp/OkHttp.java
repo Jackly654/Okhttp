@@ -41,6 +41,7 @@ import daimamiao.com.okhttp.application.App;
 public class OkHttp implements HttpInterface{
 
     private Context mContext;
+    private NetConfig mConfig;
     private static final OkHttpClient mClient;
     private static final Handler mHandler;
     private static final MediaType MEDIA_TYPE = MediaType.parse("image/*");
@@ -56,8 +57,9 @@ public class OkHttp implements HttpInterface{
     public OkHttp(){
     }
 
-    public OkHttp(Context context){
+    public OkHttp(Context context,NetConfig config){
         this.mContext = context;
+        this.mConfig = config;
     }
 
     //post处理文件
@@ -131,45 +133,42 @@ public class OkHttp implements HttpInterface{
         MultipartBuilder builder = new MultipartBuilder();
         builder.type(MultipartBuilder.FORM);
         ArrayList<Pair<String, String>> paramPair = new ArrayList<>();
-        if(config!=null){
+        if (config != null) {
             String[] paramsNames = config.params;
-            if(paramsNames!= null&&paramsValues!=null){
+            if (paramsNames != null && paramsValues != null) {
                 int length = paramsNames.length;
-                for(int i = 0;i < length;i++){
-                    if(paramsNames[i]!=null&&i<paramsValues.length){
-                        if(config.filter){
-                            if(paramsValues[i]!=null&&!"-1".equals(paramsValues[i].toString())){
-                                builder.addFormDataPart(paramsNames[i],paramsValues[i].toString());
-                                paramPair.add(new Pair(paramsNames[i],paramsValues[i].toString()));
+                for (int i = 0; i < length; i++) {
+                    if (paramsNames[i] != null && i < paramsValues.length) {
+                        if (config.filter) {
+                            if (paramsValues[i] != null && !"-1".equals(paramsValues[i].toString())) {
+                                builder.addFormDataPart(paramsNames[i], paramsValues[i].toString());
+                                paramPair.add(new Pair(paramsNames[i], paramsValues[i].toString()));
 
-                        }else{
-                            builder.addFormDataPart(paramsNames[i],paramsValues[i].toString());
+                            }
+                        } else {
+                            builder.addFormDataPart(paramsNames[i], paramsValues[i].toString());
 
 
-
-                            paramPair.add(new Pair(paramsNames[i],paramsValues[i].toString()));
+                            paramPair.add(new Pair(paramsNames[i], paramsValues[i].toString()));
                         }
-
-
-
                     }
                 }
             }
-            if(files!=null && files.length!=0){
+            if (files != null && files.length != 0) {
                 //添加文件上传
                 String[] paramsFiles = config.files;
-                if(paramsFiles!=null&&files!=null){
+                if (paramsFiles != null && files != null) {
                     int length = paramsFiles.length;
-                    for(int i = 0;i < length;i++){
-                        if(paramsFiles[i]!=null&&i<paramsFiles.length){
+                    for (int i = 0; i < length; i++) {
+                        if (paramsFiles[i] != null && i < paramsFiles.length) {
                             builder.addFormDataPart(paramsFiles[i], files[i].getName(), RequestBody.create(MEDIA_TYPE, files[i]));
                         }
                     }
                 }
             }
         }
-        if(config.addExtras){
-            builder = addPostExtrasParams(builder,paramPair,config.version);
+        if (config.addExtras) {
+            builder = addPostExtrasParams(builder, paramPair, config.version);
         }
         return builder;
     }
@@ -290,11 +289,18 @@ public class OkHttp implements HttpInterface{
 
 
 
-    private Callback getRequestParamsCallback() {
+    private Callback getRequestParamsCallback(final String action,final HttpManager.ResponseParamsListener listener,final boolean isExecute,final Object[] params) {
         return new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-
+                if(listener!=null){
+                    runAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onFail(true,e);
+                        }
+                    },false);
+                }
             }
 
             @Override
@@ -304,16 +310,19 @@ public class OkHttp implements HttpInterface{
         };
     }
 
-    public void call(){
+    public void call(NetConfig config,HttpManager.ResponseParamsListener listener,boolean isExecute,Object[] params,File[] files){
         Request.Builder builder = new Request.Builder();
-        builder.tag();
+        String action = config.action;
+        builder.tag(config);
         if("get".equals(config.method)){
             builder.url(getRequestParamsUrl());
         }else{
-            builder.url();
-            builder.post()
+            String paramsUrl = getRequestUrl(config.url);
+            builder.url(paramsUrl);
+            builder.post(getRequestBody(config,params,files).build());
 
         }
+        mClient.newCall(builder.build()).enqueue(getRequestParamsCallback(action,listener,isExecute,params));
     }
 
     private String getRequestParamsUrl() {
@@ -354,5 +363,20 @@ public class OkHttp implements HttpInterface{
     @Override
     public void removeCall(String action) {
         mClient.cancel(action);
+    }
+
+    @Override
+    public void call(NetConfig config, HttpManager.ResponseParamsListener listener, Object[] params, File[] files) {
+        call(config,listener,config.execute,params,files);
+    }
+
+    @Override
+    public void call(NetConfig config, HttpManager.ResponseListener listener, Object... params) {
+        call(config,listener,config.execute,params);
+    }
+
+    @Override
+    public void request(String url, int method, ArrayList<Pair<String, String>> params, HttpManager.ResponseParamsListener listener) {
+
     }
 }

@@ -70,7 +70,7 @@ public class OkHttp implements HttpInterface{
         builder.tag(action);
         //判断get或者post
         if("get".equals(config.method)){
-        builder.url(getRequestParamsUrl());
+        builder.url(getRequestParamsUrl(config,params));
         }else{
             String requestUrl = getRequestUrl(config.url);
             builder.url(requestUrl);
@@ -315,7 +315,7 @@ public class OkHttp implements HttpInterface{
         String action = config.action;
         builder.tag(config);
         if("get".equals(config.method)){
-            builder.url(getRequestParamsUrl());
+            builder.url(getRequestParamsUrl(config,params));
         }else{
             String paramsUrl = getRequestUrl(config.url);
             builder.url(paramsUrl);
@@ -325,8 +325,51 @@ public class OkHttp implements HttpInterface{
         mClient.newCall(builder.build()).enqueue(getRequestParamsCallback(action,listener,isExecute,params));
     }
 
-    private String getRequestParamsUrl() {
-        return null;
+    private String getRequestParamsUrl(NetConfig config,Object[] paramsValues) {
+        String paramsUrl = getRequestUrl(config.url);
+        String[] paramsNames = config.params;
+        ArrayList<Pair<String,String>> paramPair = new ArrayList<>();
+        if(paramsNames!=null&&paramsValues!=null){
+            int length = paramsNames.length;
+            for(int i=0;i<length;i++){
+                if(paramsNames[i]!=null&&i<paramsValues.length){
+                    if(config.filter){
+                        if(paramsValues[i]!=null&&(!"-1".equals(paramsValues[i].toString()))){
+                            paramsUrl += (paramsNames[i]+ "=" + paramsValues[i].toString()+"&");
+                            paramPair.add(new Pair(paramsNames[i],paramsValues[i].toString()));
+
+                        }
+                    }else{
+                        paramsUrl += (paramsNames[i] + "=" + paramsValues[i].toString() + "&");
+                        paramPair.add(new Pair(paramsNames[i], paramsValues[i].toString()));
+                    }
+                }
+            }
+        }
+        if(config.addExtras){
+            paramsUrl = addGetExtrasParams(paramsUrl,paramPair,config.version,config.replease);
+        }
+        return paramsUrl;
+    }
+
+    /**
+     * get请求附加请求参数
+     *
+     * @param url
+     */
+    public static String addGetExtrasParams(String url, ArrayList<Pair<String, String>> pairs, int version, boolean replease) {
+        ArrayList<Pair<String, String>> requestPair = getRequestPair(version);
+        int size = requestPair.size();
+        for (int i = 0; i < size; i++) {
+            Pair<String, String> pair = requestPair.get(i);
+            if (replease || !replease && !pairs.contains(pair)) {
+                url += (pair.first + "=" + pair.second + "&");
+            }
+        }
+        pairs.addAll(requestPair);
+        //记录请求链接
+        url += ("sign" + "=" + getSignValue(pairs));
+        return url;
     }
 
     /**

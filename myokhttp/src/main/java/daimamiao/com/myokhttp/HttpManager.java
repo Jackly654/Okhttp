@@ -16,7 +16,6 @@ import daimamiao.com.myokhttp.listener.Task;
 import daimamiao.com.myokhttp.preference.ConfigManager;
 import daimamiao.com.myokhttp.preference.config.NetConfig;
 import daimamiao.com.myokhttp.utils.Loger;
-import daimamiao.com.myokhttp.utils.RunnableUtils;
 import daimamiao.com.okhttp.application.App;
 
 /**
@@ -119,6 +118,16 @@ public class HttpManager {
         }
     }
 
+    /**
+     * 请求事件
+     *
+     * @param action
+     * @param listener
+     * @param params
+     */
+    public static <T extends HttpInterface> void request(Object object, final String action, final ResponseListener listener, Object... params) {
+        request(object, action, listener, OkHttp.class, params);
+    }
 
     /**
      * 获得网络状态显示字符串
@@ -169,6 +178,9 @@ public class HttpManager {
         }
         return result;
     }
+
+
+
 
     public static class SimpleRespnseListener implements ResponseListener{
 
@@ -248,7 +260,7 @@ public class HttpManager {
      * @param listener
      * @param params
      */
-    public static void request(Object object,final String action, final ResponseParamsListener listener,Object... params){
+    public static <T extends HttpInterface> void request(Object object,final String action, final ResponseParamsListener listener,Object... params){
         request(object,action,listener,OkHttp.class,params,null);
     }
 

@@ -2,6 +2,7 @@ package daimamiao.com.myokhttp.utils;
 
 import android.text.TextUtils;
 
+
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -13,7 +14,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import daimamiao.com.okhttp.application.App;
 
 /**功能描述：这是一个简易的Json-HashMap转换工具，可以将普通的json数据（字符串）
  *         转换为一个HashMap<Srting, Object>表格，也可以反过来操作。此外还支 持将json数据格式化。

@@ -81,7 +81,7 @@ public class NetWorkConfig {
      */
     public static String source() {
         return String.format(
-                "%s/%s/source_v4.json" , CdnPath,
+                "%s/%s" , CdnPath,
                 NewsPath);
     }
 

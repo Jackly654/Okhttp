@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import daimamiao.com.myokhttp.preference.config.NetConfig;
@@ -30,7 +29,6 @@ import daimamiao.com.myokhttp.preference.preference.PreferenceUtils;
 import daimamiao.com.myokhttp.utils.DeviceUtils;
 import daimamiao.com.myokhttp.utils.EncryptUtils;
 import daimamiao.com.myokhttp.utils.JsonUtls;
-import daimamiao.com.myokhttp.utils.Loger;
 import daimamiao.com.myokhttp.utils.PackageUtil;
 import daimamiao.com.myokhttp.utils.RunnableUtils;
 import daimamiao.com.okhttp.application.App;
@@ -63,7 +61,7 @@ public class OkHttp implements HttpInterface{
     }
 
     //post处理文件
-    public void call(NetConfig config,HttpManager.ResponseListener listener,boolean isExecute,Object... params){
+    public void call(NetConfig config,final HttpManager.ResponseListener listener, final boolean isExecute,Object... params){
         Request.Builder builder = new Request.Builder();
         final String action = config.action;
         //设置取消的tag
@@ -78,7 +76,7 @@ public class OkHttp implements HttpInterface{
         }
        mClient.newCall(builder.build()).enqueue(new Callback() {
            @Override
-           public void onFailure(Request request, IOException e) {
+           public void onFailure(Request request, final IOException e) {
                 if(listener!=null){
                     runAction(new Runnable() {
                         @Override
@@ -95,11 +93,11 @@ public class OkHttp implements HttpInterface{
                     String body = null;
                     body = response.body().string();
                     //TODO 数据库插入保存 （需要自己添加
-                    Map<String, String> params = JsonUtls.getResonseDataMap(body);
+                    final Map<String, String> params = JsonUtls.getResonseDataMap(body);
                     if(params!=null&&listener!=null){
                         //后台确定
-                        Boolean isSuccess = Boolean.valueOf(params.get("success"));
-                        int code = JsonUtls.getRequestNumber(params.get("error_code"));
+                        final Boolean isSuccess = Boolean.valueOf(params.get("success"));
+                        final int code = JsonUtls.getRequestNumber(params.get("error_code"));
                         runAction(new Runnable() {
                             @Override
                             public void run() {
@@ -292,7 +290,7 @@ public class OkHttp implements HttpInterface{
     private Callback getRequestParamsCallback(final String action,final HttpManager.ResponseParamsListener listener,final boolean isExecute,final Object[] params) {
         return new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Request request, final IOException e) {
                 if(listener!=null){
                     runAction(new Runnable() {
                         @Override

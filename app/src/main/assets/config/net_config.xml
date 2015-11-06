@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<net>
+
+    <item action="source_data" info="数据源" method="get"
+        url="/source_v4.json" />
+
+    <item action="account_detail" info="公众号详情" method="get"
+        params="account_id&amp;since_id&amp;max_id" url="/v1/account/article/lists.json?"
+        />
+
+
+    <item action="save_userinfo" info="保存用户数据" method="post"
+        params="nickname&amp;sex&amp;realname&amp;mobile&amp;qq"
+        url="/v1/user/update/put.json?" />
+
+    <item action="exchange_data" info="兑换数据" method="get"
+        url="/v1/user/gift/lists.json?" />
+
+    <item action="submit_invite_code" info="兑换邀请码" method="post" params="invite_code"
+        url="/v1/user/invite/put.json?" />
+
+
+</net>
